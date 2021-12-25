@@ -19,17 +19,22 @@
 
 .balloon {
     position: absolute;
-    width: 50px;
-    height: 50px;
-    background-color: aqua;
     border-radius: 50%;
-    transition: ease-in-out 0.2s ;
+    animation: color-change-and-enlarge 5s infinite;
 }
 
-.balloon:hover {
-    background-color: rgba(255, 0, 208, 0.2);
-    width: 100px;
-    height: 100px;
-    transform: translate(-25px, -25px);
-    transition: ease-in-out 0.3s ;
+@keyframes color-change-and-enlarge {
+    0% { 
+        background-color: aqua;
+        opacity: 80%;
+        width: 50px;
+        height: 50px;
+    }
+    100% { 
+        background-color: rgb(255, 0, 255); 
+        opacity: 20%;
+        width: 100px;
+        height: 100px;
+        transform: translate(-25px, -25px);
+    }
 }

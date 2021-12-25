@@ -1,5 +1,7 @@
 var totalBalloons = 0;
 var poppedBalloons = 0;
+var failedToPop = 0;
+var gameOver = false;
 
 function displayTotalBalloons() {
     document.getElementById("totalBalloons").innerHTML = totalBalloons;
@@ -21,6 +23,7 @@ function getRandomCoordinate() {
 function resetGame() {
     totalBalloons = 0;
     poppedBalloons = 0;
+    failedToPop = 0;
     displayTotalBalloons();
     displayPoppedBalloons();
     document.getElementById("balloonBoard").innerHTML = "";
@@ -32,31 +35,47 @@ function removeBalloon(element) {
     displayPoppedBalloons();
 }
 
+function incrementFailedToPop(element) {
+    if (document.getElementById(element.id)) {
+        element.remove()
+        failedToPop++;
+
+        if (failedToPop == 20) {
+            handleGameOver()
+        }
+    }
+}
+
+function handleGameOver() {
+    gameOver = true;
+    if (confirm(`Game Over! Your Score is ${poppedBalloons}. Play Again?`)) {
+        gameOver = false;
+        resetGame();
+        timeOut = 1000;
+    }
+}
+
 
 function addBalloons() {
-    let randonCoordinates = getRandomCoordinate();
-    let balloon = document.createElement("div");
-    balloon.className = "balloon";
-    balloon.style.left = randonCoordinates.x + "px";
-    balloon.style.top = randonCoordinates.y + 50 + "px";
-
-    balloon.onclick = (e) => {
-        removeBalloon(e.target);
-    }
-
-    totalBalloons++;
-    displayTotalBalloons();
-    document.getElementById("balloonBoard").appendChild(balloon);
-    if (timeOut = timeOut >= 100 ? timeOut - 10 : timeOut) {
-        if (totalBalloons - poppedBalloons < 20) {
-            setTimeout(addBalloons, timeOut);
+    if (!gameOver) {
+        let randomCoordinates = getRandomCoordinate();
+        let balloon = document.createElement("div");
+        balloon.className = "balloon";
+        balloon.id = `bal${totalBalloons}`;
+        balloon.style.left = randomCoordinates.x + "px";
+        balloon.style.top = randomCoordinates.y + 50 + "px";
+    
+        balloon.onclick = (e) => {
+            removeBalloon(e.target);
         }
-        else {
-            if (confirm(`Game Over! Your Score is ${poppedBalloons}. Play Again?`)) {
-                resetGame();
-                timeOut = 1000;
-                setTimeout(addBalloons, timeOut);
-            }
+    
+        setTimeout(() => incrementFailedToPop(balloon), 5000);
+    
+        totalBalloons++;
+        displayTotalBalloons();
+        document.getElementById("balloonBoard").appendChild(balloon);
+        if (!gameOver && (timeOut = timeOut >= 100 ? timeOut - 10 : timeOut)) {
+            setTimeout(addBalloons, timeOut);
         }
     }
 }
