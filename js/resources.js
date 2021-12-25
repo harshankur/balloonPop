@@ -26,7 +26,7 @@ function closeAlert() {
  * @param {string} proceedButtonAction Action to be executed when the proceed button is pressed
  * @param {string} cancelButtonText Text to be shown in the cancel button
  */
-function showPrompt(title, message, proceedButtonText = "OK", proceedButtonAction = "", cancelButtonText, cancelButtonAction) {
+function showPrompt(title, message, proceedButtonText, proceedButtonAction, cancelButtonText, cancelButtonAction) {
     document.getElementById("showPromptModalLabel").innerText   = title;
     document.getElementById("promptMessage").innerHTML          = message;
     document.getElementById("promptProceedButton").innerText    = proceedButtonText;

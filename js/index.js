@@ -48,11 +48,14 @@ function incrementFailedToPop(element) {
 
 function handleGameOver() {
     gameOver = true;
-    if (confirm(`Game Over! Your Score is ${poppedBalloons}. Play Again?`)) {
-        gameOver = false;
-        resetGame();
-        timeOut = 1000;
-    }
+    showPrompt("Game Over!", `Your Score is ${poppedBalloons}. Play Again?`, "Restart", "restartGame()");
+}
+
+function restartGame() {
+    gameOver = false;
+    resetGame();
+    timeOut = 1000;
+    addBalloons();
 }
 
 
@@ -74,7 +77,7 @@ function addBalloons() {
         totalBalloons++;
         displayTotalBalloons();
         document.getElementById("balloonBoard").appendChild(balloon);
-        if (!gameOver && (timeOut = timeOut >= 100 ? timeOut - 10 : timeOut)) {
+        if (!gameOver && (timeOut = timeOut >= 550 ? timeOut - 10 : timeOut)) {
             setTimeout(addBalloons, timeOut);
         }
     }
