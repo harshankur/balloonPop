@@ -1,3 +1,9 @@
+:root {
+    --main-bg-color: #12304d;
+    --sub-bg-color: #f7f7f7;
+    --btn-bg-color: #0051a1;
+}
+
 .navbar {
     position: absolute;
     display: flex;
@@ -6,16 +12,15 @@
     left: 0;
     top: 0;
     height: 50px;
-    background-color: rgba(128, 128, 128, 0.5);
+    background-color: var(--main-bg-color);
+    color: white;
+    font-size: large;
 }
 
 .nav-half {
     width: 50%;
     padding: 0 100px;
-    font: bold;
-    font-size: large;
 }
-
 
 .balloon {
     position: absolute;
@@ -37,4 +42,32 @@
         height: 100px;
         transform: translate(-25px, -25px);
     }
+}
+
+.modal-header {
+    background-color: var(--main-bg-color);
+    color: white;
+}
+
+.modal-header .close {
+    color: white;
+}
+
+.modal-body {
+    background: var(--sub-bg-color);
+}
+
+.blue-button {
+    background-color: #0062c2;
+    color: #e7f0f9;
+    border-radius: 3px;
+}
+
+.blue-button.btn:hover {
+    color: white;
+    background: #0051a1;
+}
+
+.btn {
+    border: none;
 }
