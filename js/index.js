@@ -13,7 +13,7 @@ function displayPoppedBalloons() {
 
 function getRandomCoordinate() {
     let randomX = Math.random()*(innerWidth-200);
-    let randomY = Math.random()*(innerHeight-265);
+    let randomY = Math.random()*(innerHeight-300);
 
     return {
         x: randomX,
