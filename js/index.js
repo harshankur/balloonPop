@@ -3,6 +3,22 @@ var poppedBalloons = 0;
 var failedToPop = 0;
 var gameOver = false;
 
+if (getCookie("firstVisit") != "no") {
+    showAlert("Hey there!",
+    "Welcome to Baloon Pop. Click on balloons as they appear on your screen. They get popped automatically within 5 secs. So, be quick. If you fail to pop 20 balloons, you lose. All the best!", 
+    "Start",)
+}
+else {
+    setTimeout(addBalloons, 1000);
+}
+
+$("#showAlertModal").on('hide.bs.modal', function () {  
+    if (getCookie("firstVisit") != "no") {
+        setCookie("firstVisit", "no", 365);
+        setTimeout(addBalloons, 1000);
+    }
+});
+
 function displayTotalBalloons() {
     document.getElementById("totalBalloons").innerHTML = totalBalloons;
 }
@@ -86,4 +102,3 @@ function addBalloons() {
 
 
 var timeOut = 1000;
-setTimeout(addBalloons, timeOut);

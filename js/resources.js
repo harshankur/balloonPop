@@ -3,18 +3,16 @@
  * @param {string} title 
  * @param {string} message 
  */
- function showAlert(title, message) {
-    document.getElementById("showAlertModalLabel").innerText    = title;
-    document.getElementById("alertMessage").innerHTML           = message;
+ function showAlert(title, message, proceedButtonText) {
+    document.getElementById("showAlertModalLabel").innerText        = title;
+    document.getElementById("alertMessage").innerHTML               = message;
+    document.getElementById("alertAcknowledgedButton").innerText    = proceedButtonText;
 
     $("#showAlertModal").modal('show');
 }
 
 function closeAlert() {
     $("#showAlertModal").modal('hide');
-
-    document.getElementById("showAlertModalLabel").innerText    = "Alert";
-    document.getElementById("alertMessage").innerHTML           = "Message";
 }
 
 /**
