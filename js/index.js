@@ -8,11 +8,12 @@ function displayTotalBalloons() {
 }
 function displayPoppedBalloons() {
     document.getElementById("poppedBalloons").innerHTML = poppedBalloons;
+    document.title = `Balloon Pop (Score: ${poppedBalloons})`;
 }
 
 function getRandomCoordinate() {
     let randomX = Math.random()*(innerWidth-50);
-    let randomY = Math.random()*(innerHeight-100);
+    let randomY = Math.random()*(innerHeight-115);
 
     return {
         x: randomX,
@@ -66,7 +67,7 @@ function addBalloons() {
         balloon.className = "balloon";
         balloon.id = `bal${totalBalloons}`;
         balloon.style.left = randomCoordinates.x + "px";
-        balloon.style.top = randomCoordinates.y + 50 + "px";
+        balloon.style.top = randomCoordinates.y + 65 + "px";
     
         balloon.onclick = (e) => {
             removeBalloon(e.target);
