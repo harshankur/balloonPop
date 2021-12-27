@@ -12,8 +12,8 @@ function displayPoppedBalloons() {
 }
 
 function getRandomCoordinate() {
-    let randomX = Math.random()*(innerWidth-50);
-    let randomY = Math.random()*(innerHeight-115);
+    let randomX = Math.random()*(innerWidth-200);
+    let randomY = Math.random()*(innerHeight-265);
 
     return {
         x: randomX,
@@ -66,8 +66,8 @@ function addBalloons() {
         let balloon = document.createElement("div");
         balloon.className = "balloon";
         balloon.id = `bal${totalBalloons}`;
-        balloon.style.left = randomCoordinates.x + "px";
-        balloon.style.top = randomCoordinates.y + 65 + "px";
+        balloon.style.left = randomCoordinates.x + 100 + "px";
+        balloon.style.top = randomCoordinates.y + 100 + "px";
     
         balloon.onclick = (e) => {
             removeBalloon(e.target);
