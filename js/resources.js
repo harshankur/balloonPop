@@ -37,13 +37,6 @@ function showPrompt(title, message, proceedButtonText, proceedButtonAction, canc
 
 function closePrompt() {
     $("#showPromptModal").modal('hide');
-
-    document.getElementById("showPromptModalLabel").innerText   = "Prompt";
-    document.getElementById("promptMessage").innerText          = "Message";
-    document.getElementById("promptProceedButton").innerText    = "Proceed";
-    document.getElementById("promptCancelButton").innerText    = "Cancel";
-
-    document.getElementById("promptCancelButton").setAttribute('onclick', "closePrompt(); ")
 }
 
 
