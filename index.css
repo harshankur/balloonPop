@@ -1,6 +1,6 @@
 :root {
     /* --main-bg-color: #12304d; */
-    --main-bg-color: black;
+    --main-bg-color: rgb(18, 18, 18);
     --sub-bg-color: #f7f7f7;
     --btn-bg-color: #0051a1;
 
@@ -117,15 +117,12 @@ footer {
     bottom: 0;
     width: 100%;
     height: 35px;
-    background-color: rgb(231, 251, 251);
+    background-color: var(--main-bg-color);
+    color: white;
     margin: 0 !important;
     padding: 5px;
     display: flex;
     justify-content: space-evenly;
-}
-
-.recede-text-margin {
-    margin-left: -50%;
 }
 
 #highestPoppedBalloonsSpan {
