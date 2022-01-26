@@ -14,7 +14,7 @@ body {
 .navbar {
     position: absolute;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     width: 100%;
     left: 0;
     top: 0;
@@ -23,7 +23,9 @@ body {
     color: white;
     font-size: large;
     margin: 0;
-    padding: auto;
+    padding: 0;
+    padding-left: 1rem;
+    padding-right: 5px;
 }
 
 .nav-banner {
