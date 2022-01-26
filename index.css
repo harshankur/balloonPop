@@ -14,7 +14,7 @@ body {
 .navbar {
     position: absolute;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     width: 100%;
     left: 0;
     top: 0;
@@ -120,9 +120,14 @@ footer {
     background-color: rgb(231, 251, 251);
     margin: 0 !important;
     padding: 5px;
-    text-decoration: underline;
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .recede-text-margin {
     margin-left: -50%;
+}
+
+#highestPoppedBalloonsSpan {
+    font-weight: bold;
 }

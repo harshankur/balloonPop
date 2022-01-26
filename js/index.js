@@ -1,6 +1,7 @@
 var totalBalloons = 0;
 var poppedBalloons = 0;
 var failedToPop = 0;
+var highestPoppedBalloons = 0;
 var gameOver = false;
 
 if (getCookie("firstVisit") != "no") {
@@ -9,14 +10,15 @@ if (getCookie("firstVisit") != "no") {
     "Start",)
 }
 else {
+    highestPoppedBalloons = parseInt(getCookie("highestPoppedBalloons"), 10);
+    displayHighestPoppedBalloons();
     setTimeout(addBalloons, 1000);
 }
 
-$("#showAlertModal").on('hide.bs.modal', function () {  
-    if (getCookie("firstVisit") != "no") {
-        setCookie("firstVisit", "no", 365);
-        setTimeout(addBalloons, 1000);
-    }
+$("#showAlertModal").on('hide.bs.modal', function () {
+    setCookie("firstVisit", "no", 3650);
+    setCookie("highestPoppedBalloons", 0, 3650);
+    setTimeout(addBalloons, 1000);
 });
 
 function displayTotalBalloons() {
@@ -25,6 +27,12 @@ function displayTotalBalloons() {
 function displayPoppedBalloons() {
     document.getElementById("poppedBalloons").innerHTML = poppedBalloons;
     document.title = `Balloon Pop (Score: ${poppedBalloons})`;
+}
+function displayFailedToPopBalloons() {
+    document.getElementById("missedBalloons").innerHTML = failedToPop;
+}
+function displayHighestPoppedBalloons() {
+    document.getElementById("highestPoppedBalloons").innerHTML = highestPoppedBalloons;
 }
 
 function getRandomCoordinate() {
@@ -43,6 +51,7 @@ function resetGame() {
     failedToPop = 0;
     displayTotalBalloons();
     displayPoppedBalloons();
+    displayFailedToPopBalloons();
     document.getElementById("balloonBoard").innerHTML = "";
 }
 
@@ -50,12 +59,18 @@ function removeBalloon(element) {
     element.remove();
     poppedBalloons++;
     displayPoppedBalloons();
+    if (poppedBalloons > highestPoppedBalloons) {
+        highestPoppedBalloons = poppedBalloons;
+        setCookie("highestPoppedBalloons", highestPoppedBalloons, 3650);
+        displayHighestPoppedBalloons();
+    }
 }
 
 function incrementFailedToPop(element) {
     if (document.getElementById(element.id)) {
         element.remove()
         failedToPop++;
+        displayFailedToPopBalloons();
 
         if (failedToPop == 20) {
             handleGameOver()
