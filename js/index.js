@@ -110,8 +110,15 @@ function addBalloons() {
         balloon.style.left = randomCoordinates.x + 100 + "px";
         balloon.style.top = randomCoordinates.y + 100 + "px";
     
-        balloon.onmousedown = (e) => {
-            removeBalloon(e.target);
+        if (mobileAndTabletCheck()) {
+            balloon.ontouchstart = (e) => {
+                removeBalloon(e.target);
+            }
+        }
+        else {
+            balloon.onmousedown = (e) => {
+                removeBalloon(e.target);
+            }
         }
     
         setTimeout(() => incrementFailedToPop(balloon), 5000);
