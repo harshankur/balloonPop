@@ -24,15 +24,30 @@ body {
     font-size: large;
     margin: 0;
     padding: 0;
-    padding-left: 1rem;
+    padding-left: 15px;
     padding-right: 5px;
+    overflow: hidden;
 }
 
-.nav-banner {
-    margin: auto;
-    /* -webkit-text-stroke-width: 1px; */
-    /* -webkit-text-stroke-color: white; */
-    animation: color-change-infinite 10s infinite;
+.app-name {
+    margin: 5px 0px;
+}
+
+.bmc-btn-container {
+    transform: scale(0.9);
+    position: absolute;
+    right: -5px;
+}
+
+
+@media only screen and (max-width: 600px) {
+    h1 {
+      font-size: xx-large;
+    }
+    .bmc-btn-container {
+        transform: scale(0.8);
+        right: -15px;
+    }
 }
 
 @keyframes color-change-infinite {
