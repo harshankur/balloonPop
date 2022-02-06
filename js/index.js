@@ -134,23 +134,3 @@ function addBalloons() {
 
 
 var timeOut = MAX_TIMEOUT;
-
-if (navigator.share) {
-    navigator.share({
-        title: document.title,
-        text: `I scored ${poppedBalloons} on Balloon Pop. Can you beat it?`,
-        url: 'https://balloonpop.xyz/',
-    })
-        .then(() => console.log('Successful share'))
-        .catch((error) => console.log('Error sharing', error));
-}
-if (navigator.canShare && navigator.canShare()) {
-    navigator.share({
-        title: document.title,
-        text: `I scored ${poppedBalloons} on Balloon Pop. Can you beat it?`,
-    })
-        .then(() => console.log('Share was successful.'))
-        .catch((error) => console.log('Sharing failed', error));
-} else {
-    console.log(`Your system doesn't support sharing files.`);
-}
