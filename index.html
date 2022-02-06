@@ -8,10 +8,13 @@
 
     <!-- Foreign CSS Files -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="canonical"  href="/web/tweet-button">
 
     <!-- Local CSS -->
     <link rel="stylesheet" href="index.css">
+
+    <!-- Foreign JS File -->
+    <script src="https://kit.fontawesome.com/9dd69d2626.js" crossorigin="anonymous"></script>
 
     <link rel="icon" type="image/x-icon" href="logo.png">
   </head>
@@ -43,12 +46,12 @@
     </footer>
 
 
-    <!-- Show Alert modal -->
-    <div class="modal fade" id="showAlertModal" tabindex="-1" role="dialog" aria-labelledby="showAlertModal" aria-hidden="true">
+    <!-- Show Intro Alert modal -->
+    <div class="modal fade" id="showIntroAlertModal" tabindex="-1" role="dialog" aria-labelledby="showIntroAlertModal" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="showAlertModalLabel">Alert</h5>
+            <h5 class="modal-title" id="showIntroAlertModalLabel">👋 Hey there!</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -56,23 +59,23 @@
           <div class="modal-body">
             <form>
               <div class="form-group">
-                <p id="alertMessage" disabled></p>
+                <p id="alertMessage" disabled>Welcome to Baloon Pop. Click/Tap on balloons as they appear on your screen. They get popped automatically within 5 secs. So, be quick. If you fail to pop 20 balloons, you lose. All the best!</p>
               </div>
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn blue-button" id="alertAcknowledgedButton" onclick="closeAlert()">OK</button>
+            <button type="button" class="btn blue-button" id="alertAcknowledgedButton" onclick="closeAlert()"><i class="fas fa-play"></i> Start</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Show Prompt modal -->
-    <div class="modal fade" id="showPromptModal" tabindex="-1" role="dialog" aria-labelledby="showPromptModal" aria-hidden="true">
+    <!-- Show Game Over Prompt modal -->
+    <div class="modal fade" id="showGameOverPromptModal" tabindex="-1" role="dialog" aria-labelledby="showGameOverPromptModal" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="showPromptModalLabel">Prompt</h5>
+            <h5 class="modal-title" id="showGameOverPromptModalLabel">Game Over!</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -85,8 +88,9 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" id="promptCancelButton" onclick="closePrompt()">Cancel</button>
-            <button type="button" class="btn blue-button" id="promptProceedButton" onclick="closePrompt()">Proceed</button>
+            <button type="button" class="btn btn-secondary btn-twitter" onclick="shareScoreOnTwitter()"><i class="fab fa-twitter"></i> Tweet</button>
+            <button type="button" class="btn btn-secondary" id="shareScoreButton" onclick="shareScore()"><i class="fa fa-share"></i> Share</button>
+            <button type="button" class="btn blue-button" id="restartGameButton" onclick="closePrompt(); restartGame()"><i class="fa fa-refresh"></i> Restart</button>
           </div>
         </div>
       </div>

@@ -4,7 +4,10 @@
     --sub-bg-color: #f7f7f7;
     --btn-bg-color: #0051a1;
 
-    --top-header-height: 65px
+    --top-header-height: 65px;
+
+    --btn-twitter-blue: #1DA1F2;
+    --btn-twitter-blue-hover: #1a88cc;
 }
 
 body {
@@ -144,4 +147,13 @@ footer {
 
 #highestPoppedBalloonsSpan {
     font-weight: bold;
+}
+
+
+.btn-twitter {
+    background-color: var(--btn-twitter-blue);
+}
+
+.btn-twitter:hover {
+    background-color: var(--btn-twitter-blue-hover);
 }

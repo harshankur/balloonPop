@@ -1,42 +1,26 @@
 /**
  * This function shows a modal window with the title and message passed in argument and a destructive OK button
- * @param {string} title 
- * @param {string} message 
  */
- function showAlert(title, message, proceedButtonText) {
-    document.getElementById("showAlertModalLabel").innerText        = title;
-    document.getElementById("alertMessage").innerHTML               = message;
-    document.getElementById("alertAcknowledgedButton").innerText    = proceedButtonText;
-
-    $("#showAlertModal").modal('show');
+ function showIntroAlert() {
+    $("#showIntroAlertModal").modal('show');
 }
 
 function closeAlert() {
-    $("#showAlertModal").modal('hide');
+    $("#showIntroAlertModal").modal('hide');
 }
 
 /**
- * This function prompts the user with the title, message and provides a cancel button and a button with proceedButtonText.
- * This function also sets the action to be called by the proceed button
- * @param {string} title 
+ * This function prompts the user with the message and provides a share button and a restart button.
  * @param {string} message 
- * @param {string} proceedButtonText Text to be shown in the proceed button
- * @param {string} proceedButtonAction Action to be executed when the proceed button is pressed
- * @param {string} cancelButtonText Text to be shown in the cancel button
  */
-function showPrompt(title, message, proceedButtonText, proceedButtonAction, cancelButtonText, cancelButtonAction) {
-    document.getElementById("showPromptModalLabel").innerText   = title;
-    document.getElementById("promptMessage").innerHTML          = message;
-    document.getElementById("promptProceedButton").innerText    = proceedButtonText;
-    document.getElementById("promptProceedButton").setAttribute('onclick', "closePrompt(); " + proceedButtonAction);
-    if (cancelButtonText != undefined) document.getElementById("promptCancelButton").innerText    = cancelButtonText;
-    if (cancelButtonAction != undefined) document.getElementById("promptCancelButton").setAttribute('onclick', "closePrompt(); " + cancelButtonAction)
+function showGameOverPrompt(message) {
+    document.getElementById("promptMessage").innerHTML  = message;
 
-    $("#showPromptModal").modal('show');
+    $("#showGameOverPromptModal").modal('show');
 }
 
 function closePrompt() {
-    $("#showPromptModal").modal('hide');
+    $("#showGameOverPromptModal").modal('hide');
 }
 
 
