@@ -6,7 +6,7 @@ window.mobileAndTabletCheck = function() {
 };
 
 const MAX_TIMEOUT = 1000
-const MIN_TIMEOUT = mobileAndTabletCheck() ? 250 : 550;
+const MIN_TIMEOUT = mobileAndTabletCheck() ? 200 : 550;
 
 var totalBalloons = 0;
 var poppedBalloons = 0;
