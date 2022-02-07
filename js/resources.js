@@ -1,7 +1,7 @@
 /**
  * This function shows a modal window with the title and message passed in argument and a destructive OK button
  */
- function showIntroAlert() {
+function showIntroAlert() {
     $("#showIntroAlertModal").modal('show');
 }
 

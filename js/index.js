@@ -9,6 +9,8 @@ const ISTOUCHDEVICE = mobileAndTabletCheck();
 const MAX_TIMEOUT = 1000;
 const MIN_TIMEOUT = ISTOUCHDEVICE ? 200 : 500;
 
+const DECREMENT_INDEX = 40;
+
 var totalBalloons = 0;
 var poppedBalloons = 0;
 var failedToPop = 0;
@@ -128,7 +130,7 @@ function addBalloons() {
         totalBalloons++;
         displayTotalBalloons();
         document.getElementById("balloonBoard").appendChild(balloon);
-        if (!gameOver && (timeOut = timeOut >= MIN_TIMEOUT ? timeOut - 25 : timeOut)) {
+        if (!gameOver && (timeOut = timeOut >= MIN_TIMEOUT ? timeOut - parseInt(timeOut/DECREMENT_INDEX, 10) : timeOut)) {
             setTimeout(addBalloons, timeOut);
         }
     }
