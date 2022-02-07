@@ -16,7 +16,10 @@ function closeAlert() {
 function showGameOverPrompt(message) {
     document.getElementById("promptMessage").innerHTML  = message;
 
-    $("#showGameOverPromptModal").modal('show');
+    $("#showGameOverPromptModal").modal({
+        backdrop: 'static',
+        keyboard: false
+    });
 }
 
 function closePrompt() {

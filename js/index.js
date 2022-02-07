@@ -15,18 +15,18 @@ var failedToPop = 0;
 var highestPoppedBalloons = 0;
 var gameOver = false;
 
+showIntroAlert();
+
 if (getCookie("firstVisit") != "no") {
-    showIntroAlert()
+    setCookie("firstVisit", "no", 3650);
+    setCookie("highestPoppedBalloons", 0, 3650);
 }
 else {
     highestPoppedBalloons = parseInt(getCookie("highestPoppedBalloons"), 10);
     displayHighestPoppedBalloons();
-    setTimeout(addBalloons, MAX_TIMEOUT);
 }
 
 $("#showIntroAlertModal").on('hide.bs.modal', function () {
-    setCookie("firstVisit", "no", 3650);
-    setCookie("highestPoppedBalloons", 0, 3650);
     setTimeout(addBalloons, MAX_TIMEOUT);
 });
 
