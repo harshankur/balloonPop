@@ -152,11 +152,10 @@ function shareScore() {
         text: `I scored ${poppedBalloons} on Balloon Pop. Can you beat it?`,
         url: 'https://balloonpop.xyz/'
     }
-    if (DEVICETYPE == 'android') {
-        AndroidShareHandler.nativeShare(shareData.title, shareData.text, shareData.url)
-    }
+    if (DEVICETYPE == 'android')
+        AndroidShareHandler.nativeShare(shareData.title, shareData.text, shareData.url);
     else
-        navigator.share(shareData)
+        navigator.share(shareData);
 }
 
 function shareScoreOnTwitter() {
@@ -172,7 +171,8 @@ function shareScoreOnTwitter() {
         phantomAnchor.setAttribute('href', twitterShareUrl);
         phantomAnchor.click();
     }
-    else {
+    else if (DEVICETYPE == 'android')
+        AndroidShareHandler.nativeTwitterShare(twitterShareUrl);
+    else
         window.open(twitterShareUrl, '_blank').focus();
-    }
 }
