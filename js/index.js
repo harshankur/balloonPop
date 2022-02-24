@@ -170,10 +170,20 @@ function shareScoreOnTwitter() {
     if (DEVICETYPE == 'android')
         AndroidShareHandler.nativeTwitterShare(twitterShareUrl);
     else if (ISTOUCHDEVICE) {
-        var phantomAnchor = document.createElement("A");
+        var phantomAnchor = document.createElement("a");
         phantomAnchor.setAttribute('href', twitterShareUrl);
         phantomAnchor.click();
     }
     else
         window.open(twitterShareUrl, '_blank').focus();
+}
+
+if (DEVICETYPE == 'android') {
+    var anchorElements = document.getElementsByTagName('a');
+    for(var i = 0; i < anchorElements.length; i++){
+        anchorElements[i].onclick = function(event){ 
+            event.preventDefault();
+            AndroidShareHandler.nativeOpenBrowserLink(anchorElements[i].getAttribute('href'))
+        } 
+    }
 }
