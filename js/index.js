@@ -5,7 +5,10 @@ function mobileAndTabletCheck() {
     return check;
 };
 
-const ISTOUCHDEVICE = mobileAndTabletCheck();
+const CURRENTURL  = new URL(window.location.href);
+const DEVICETYPE  = CURRENTURL.searchParams.get("device");
+
+const ISTOUCHDEVICE = DEVICETYPE == 'android' ? true : mobileAndTabletCheck();
 const MAX_TIMEOUT = 1000;
 const MIN_TIMEOUT = ISTOUCHDEVICE ? 200 : 500;
 
@@ -94,6 +97,9 @@ function handleGameOver() {
     if (!navigator.share) {
         document.getElementById("shareScoreButton").hidden = true;
     }
+    if (DEVICETYPE == 'android') {
+        document.getElementById("shareScoreButton").hidden = false;
+    }
     showGameOverPrompt(`Your Score is ${poppedBalloons}. Play Again?`);
 }
 
@@ -146,7 +152,11 @@ function shareScore() {
         text: `I scored ${poppedBalloons} on Balloon Pop. Can you beat it?`,
         url: 'https://balloonpop.xyz/'
     }
-    navigator.share(shareData)
+    if (DEVICETYPE == 'android') {
+        AndroidShareHandler.nativeShare(shareData.title, shareData.text, shareData.url)
+    }
+    else
+        navigator.share(shareData)
 }
 
 function shareScoreOnTwitter() {
