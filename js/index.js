@@ -166,13 +166,14 @@ function shareScoreOnTwitter() {
     }
 
     var twitterShareUrl = `https://twitter.com/intent/tweet?hashtags=ballonPop&text=${shareData.text}&url=${shareData.url}`;
-    if (ISTOUCHDEVICE) {
+    
+    if (DEVICETYPE == 'android')
+        AndroidShareHandler.nativeTwitterShare(twitterShareUrl);
+    else if (ISTOUCHDEVICE) {
         var phantomAnchor = document.createElement("A");
         phantomAnchor.setAttribute('href', twitterShareUrl);
         phantomAnchor.click();
     }
-    else if (DEVICETYPE == 'android')
-        AndroidShareHandler.nativeTwitterShare(twitterShareUrl);
     else
         window.open(twitterShareUrl, '_blank').focus();
 }
