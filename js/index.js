@@ -183,7 +183,7 @@ if (DEVICETYPE == 'android') {
     for(var i = 0; i < anchorElements.length; i++){
         anchorElements[i].onclick = function(event){ 
             event.preventDefault();
-            AndroidShareHandler.nativeOpenBrowserLink(anchorElements[i].getAttribute('href'))
+            AndroidShareHandler.nativeOpenBrowserLink(event.currentTarget.getAttribute('href'))
         } 
     }
 }
