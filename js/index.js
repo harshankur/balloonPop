@@ -20,6 +20,16 @@ var failedToPop = 0;
 var highestPoppedBalloons = 0;
 var gameOver = false;
 
+
+
+var balloonPopAudio = document.getElementById("balloonPopAudio");
+
+function playBalloonPopAudio() {
+    balloonPopAudio.pause();
+    balloonPopAudio.currentTime = 0;
+    balloonPopAudio.play();
+}
+
 showIntroAlert();
 
 if (getCookie("firstVisit") != "no") {
@@ -70,6 +80,7 @@ function resetGame() {
 }
 
 function removeBalloon(element) {
+    playBalloonPopAudio();
     element.remove();
     poppedBalloons++;
     displayPoppedBalloons();
@@ -82,6 +93,7 @@ function removeBalloon(element) {
 
 function incrementFailedToPop(element) {
     if (document.getElementById(element.id)) {
+        playBalloonPopAudio();
         element.remove()
         failedToPop++;
         displayFailedToPopBalloons();
