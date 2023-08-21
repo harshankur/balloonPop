@@ -187,3 +187,8 @@ if (DEVICETYPE == 'android') {
         } 
     }
 }
+
+// Registering views on db.
+fetch(`https://homeip.harshankur.com/registerView?appId=balloonpop&deviceSize=${window.outerWidth > 960 && window.outerHeight > 960 ? "large" : window.outerWidth > 540 && window.outerHeight > 540 ? "medium" : "small"}`)
+.then(data => data.json())
+.then(response => console.log(`RESPONSE FROM VIEWCOUNTER => ${JSON.stringify(response)}`));
