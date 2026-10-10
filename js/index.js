@@ -1,189 +1,594 @@
-// Initialization:- Check Mobile device or not
-function mobileAndTabletCheck() {
-    let check = false;
-    (function (a) { if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4))) check = true; })(navigator.userAgent || navigator.vendor || window.opera);
-    return check;
-};
+(() => {
+    'use strict';
 
-const CURRENTURL  = new URL(window.location.href);
-const DEVICETYPE  = CURRENTURL.searchParams.get("device");
+    // ---------- Config ----------
 
-const ISTOUCHDEVICE = DEVICETYPE == 'android' ? true : mobileAndTabletCheck();
-const MAX_TIMEOUT = 1000;
-const MIN_TIMEOUT = ISTOUCHDEVICE ? 200 : 500;
+    const CURRENTURL = new URL(window.location.href);
+    const ISANDROID = CURRENTURL.searchParams.get("device") == 'android';
+    const ISTOUCHDEVICE = ISANDROID || window.matchMedia('(pointer: coarse)').matches;
 
-const DECREMENT_INDEX = 40;
+    const BALLOON_LIFE = 5000;                      // ms before an unpopped balloon bursts by itself
+    const MAX_MISSES = 20;
+    const FIRST_SPAWN = 600;                        // ms after pressing Play
+    const MAX_TIMEOUT = 1000;                       // starting gap between balloons, in ms
+    const MIN_TIMEOUT = ISTOUCHDEVICE ? 200 : 500;  // the gap never shrinks below this
+    const DECREMENT_INDEX = 40;                     // each balloon shrinks the gap by 1/40th
+    const SHARE_URL = 'https://balloonpop.harshankur.com/';
 
-var totalBalloons = 0;
-var poppedBalloons = 0;
-var failedToPop = 0;
-var highestPoppedBalloons = 0;
-var gameOver = false;
+    const COLORS = ['#ff4d5a', '#ff9f1c', '#ffd23f', '#2ec4a6', '#3b82f6', '#8b5cf6', '#ff6bb5'];
 
-showIntroAlert();
+    // ---------- Elements ----------
 
-if (getCookie("firstVisit") != "no") {
-    setCookie("firstVisit", "no", 3650);
-    setCookie("highestPoppedBalloons", 0, 3650);
-}
-else {
-    highestPoppedBalloons = parseInt(getCookie("highestPoppedBalloons"), 10);
-    displayHighestPoppedBalloons();
-}
+    const $ = (id) => document.getElementById(id);
+    const board = $('board');
+    const balloonLayer = $('balloons');
+    const fxLayer = $('fx');
+    const ambientLayer = $('ambient');
+    const scoreEl = $('score');
+    const bestEl = $('best');
+    const livesEl = $('lives');
+    const livesCountEl = $('livesCount');
+    const livesFillEl = $('livesFill');
+    const soundButton = $('soundButton');
+    const pauseButton = $('pauseButton');
+    const startDialog = $('startDialog');
+    const pauseDialog = $('pauseDialog');
+    const overDialog = $('overDialog');
 
-$("#showIntroAlertModal").on('hide.bs.modal', function () {
-    setTimeout(addBalloons, MAX_TIMEOUT);
-});
+    document.documentElement.style.setProperty('--life', BALLOON_LIFE + 'ms');
 
-function displayTotalBalloons() {
-    document.getElementById("totalBalloons").innerHTML = totalBalloons;
-}
-function displayPoppedBalloons() {
-    document.getElementById("poppedBalloons").innerHTML = poppedBalloons;
-    document.title = `Balloon Pop (Score: ${poppedBalloons})`;
-}
-function displayFailedToPopBalloons() {
-    document.getElementById("missedBalloons").innerHTML = failedToPop;
-}
-function displayHighestPoppedBalloons() {
-    document.getElementById("highestPoppedBalloons").innerHTML = highestPoppedBalloons;
-}
+    // ---------- Storage ----------
 
-function getRandomCoordinate() {
-    let randomX = Math.random() * (innerWidth - 200);
-    let randomY = Math.random() * (innerHeight - 300);
-
-    return {
-        x: randomX,
-        y: randomY
+    const store = {
+        get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+        set(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* storage unavailable */ } }
     };
-}
 
-function resetGame() {
-    totalBalloons = 0;
-    poppedBalloons = 0;
-    failedToPop = 0;
-    displayTotalBalloons();
-    displayPoppedBalloons();
-    displayFailedToPopBalloons();
-    document.getElementById("balloonBoard").innerHTML = "";
-}
+    function loadBest() {
+        const saved = parseInt(store.get('bp.best'), 10);
+        if (saved >= 0)
+            return saved;
 
-function removeBalloon(element) {
-    element.remove();
-    poppedBalloons++;
-    displayPoppedBalloons();
-    if (poppedBalloons > highestPoppedBalloons) {
-        highestPoppedBalloons = poppedBalloons;
-        setCookie("highestPoppedBalloons", highestPoppedBalloons, 3650);
-        displayHighestPoppedBalloons();
+        // Carry over the high score from the old cookie-based version
+        const legacy = document.cookie.match(/(?:^|;\s*)highestPoppedBalloons=(\d+)/);
+        const value = legacy ? parseInt(legacy[1], 10) : 0;
+        if (value)
+            store.set('bp.best', value);
+        return value;
     }
-}
 
-function incrementFailedToPop(element) {
-    if (document.getElementById(element.id)) {
-        element.remove()
-        failedToPop++;
-        displayFailedToPopBalloons();
+    // ---------- State ----------
 
-        if (failedToPop == 20) {
-            handleGameOver()
+    let best = loadBest();
+    let soundOn = store.get('bp.sound') != 'off';
+
+    const game = {
+        phase: 'idle',      // idle | playing | paused | over
+        clock: 0,           // ms of actual play time; stops while paused
+        last: 0,
+        nextSpawn: 0,
+        timeOut: MAX_TIMEOUT,
+        score: 0,
+        misses: 0,
+        bestAtStart: 0,
+        raf: 0
+    };
+
+    let balloons = [];
+    const balloonByElement = new Map();
+    let boardW = 0, boardH = 0, size = 64;
+
+    // ---------- Sound ----------
+
+    let audio = null;
+    let noiseBuffer = null;
+
+    function getAudio() {
+        if (!audio) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx)
+                audio = new AudioCtx();
+        }
+        if (audio && audio.state == 'suspended')
+            audio.resume();
+        return audio;
+    }
+
+    function tone(ctx, { type = 'sine', from, to, start = 0, dur, gain }) {
+        const t = ctx.currentTime + start;
+        const osc = ctx.createOscillator();
+        const amp = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(from, t);
+        osc.frequency.exponentialRampToValueAtTime(to, t + dur);
+        amp.gain.setValueAtTime(gain, t);
+        amp.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.connect(amp).connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + dur + 0.02);
+    }
+
+    function playSound(kind) {
+        if (!soundOn)
+            return;
+        const ctx = getAudio();
+        if (!ctx)
+            return;
+
+        if (kind == 'pop') {
+            if (!noiseBuffer) {
+                noiseBuffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.12), ctx.sampleRate);
+                const data = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < data.length; i++)
+                    data[i] = Math.random() * 2 - 1;
+            }
+            const t = ctx.currentTime;
+            const src = ctx.createBufferSource();
+            const hp = ctx.createBiquadFilter();
+            const amp = ctx.createGain();
+            src.buffer = noiseBuffer;
+            src.playbackRate.value = 0.9 + Math.random() * 0.4;
+            hp.type = 'highpass';
+            hp.frequency.value = 900;
+            amp.gain.setValueAtTime(0.32, t);
+            amp.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+            src.connect(hp).connect(amp).connect(ctx.destination);
+            src.start(t);
+            src.stop(t + 0.12);
+            const pitch = 380 + Math.random() * 160;
+            tone(ctx, { from: pitch, to: pitch * 0.4, dur: 0.09, gain: 0.16 });
+        }
+        else if (kind == 'miss') {
+            tone(ctx, { from: 240, to: 110, dur: 0.18, gain: 0.12 });
+        }
+        else if (kind == 'over') {
+            [392, 330, 262].forEach((f, i) => tone(ctx, { type: 'triangle', from: f, to: f * 0.98, start: i * 0.16, dur: 0.3, gain: 0.14 }));
         }
     }
-}
 
-function handleGameOver() {
-    gameOver = true;
-    if (!navigator.share) {
-        document.getElementById("shareScoreButton").hidden = true;
+    function vibrate(ms) {
+        if (soundOn && navigator.vibrate)
+            navigator.vibrate(ms);
     }
-    if (DEVICETYPE == 'android') {
-        document.getElementById("shareScoreButton").hidden = false;
+
+    function renderSoundButton() {
+        soundButton.setAttribute('aria-pressed', String(!soundOn));
+        soundButton.setAttribute('aria-label', soundOn ? 'Mute sound' : 'Unmute sound');
+        $('soundIcon').setAttribute('href', soundOn ? '#i-sound-on' : '#i-sound-off');
     }
-    showGameOverPrompt(`Your Score is ${poppedBalloons}. Play Again?`);
-}
 
-function restartGame() {
-    gameOver = false;
-    resetGame();
-    timeOut = MAX_TIMEOUT;
-    addBalloons();
-}
+    // ---------- HUD ----------
 
+    function bump(el) {
+        el.animate([{ transform: 'scale(1.3)' }, { transform: 'scale(1)' }], { duration: 160, easing: 'ease-out' });
+    }
 
-function addBalloons() {
-    if (!gameOver) {
-        let randomCoordinates = getRandomCoordinate();
-        let balloon = document.createElement("div");
-        balloon.className = "balloon";
-        balloon.id = `bal${totalBalloons}`;
-        balloon.style.left = randomCoordinates.x + 100 + "px";
-        balloon.style.top = randomCoordinates.y + 100 + "px";
+    // The page title shows the score once a game is under way. It is left alone on load, because the
+    // view tracker reads the title then and should record the plain "Balloon Pop".
+    function renderScore(updateTitle = true) {
+        scoreEl.textContent = game.score;
+        if (updateTitle)
+            document.title = `Balloon Pop (Score: ${game.score})`;
+    }
 
-        if (ISTOUCHDEVICE) {
-            balloon.ontouchstart = (e) => {
-                removeBalloon(e.target);
+    function renderBest() {
+        bestEl.textContent = best;
+    }
+
+    function renderLives() {
+        const left = MAX_MISSES - game.misses;
+        livesCountEl.textContent = left;
+        livesFillEl.style.transform = `scaleX(${left / MAX_MISSES})`;
+        livesEl.setAttribute('aria-label', `${left} lives left`);
+        livesEl.classList.toggle('low', left <= 5 && game.phase == 'playing');
+    }
+
+    function formatTime(ms) {
+        const total = Math.floor(ms / 1000);
+        return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+    }
+
+    // ---------- Layout ----------
+
+    function measure() {
+        const rect = board.getBoundingClientRect();
+        boardW = rect.width;
+        boardH = rect.height;
+        size = Math.round(Math.min(92, Math.max(54, Math.min(boardW, boardH) * 0.13)));
+        board.style.setProperty('--size', size + 'px');
+    }
+
+    // Of a handful of random spots, pick the one furthest from existing balloons so they rarely stack.
+    function pickSpot() {
+        const pad = size * 0.3;                     // balloons inflate by 25% around their centre
+        const maxX = Math.max(pad, boardW - size - pad);
+        const maxY = Math.max(pad, boardH - size * 1.2 - size * 0.55 - pad);
+        let spot = null;
+        let spotDistance = -1;
+        for (let i = 0; i < 10; i++) {
+            const x = pad + Math.random() * (maxX - pad);
+            const y = pad + Math.random() * (maxY - pad);
+            let nearest = Infinity;
+            for (const b of balloons)
+                nearest = Math.min(nearest, Math.hypot(b.x - x, b.y - y));
+            if (nearest > spotDistance) {
+                spotDistance = nearest;
+                spot = { x, y };
             }
+        }
+        return spot;
+    }
+
+    function createBalloonElement(color) {
+        const el = document.createElement('div');
+        el.className = 'balloon';
+        el.style.setProperty('--c', color);
+        el.innerHTML = '<div class="balloon-body"></div><div class="balloon-ring"></div>';
+        return el;
+    }
+
+    // ---------- Effects ----------
+
+    function burst(cx, cy, color, missed) {
+        const count = missed ? 5 : 10;
+        const reach = size / 64;
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+            const dist = (missed ? 18 + Math.random() * 18 : 36 + Math.random() * 46) * reach;
+            const p = document.createElement('i');
+            p.className = missed ? 'particle miss' : 'particle';
+            p.style.left = cx + 'px';
+            p.style.top = cy + 'px';
+            p.style.setProperty('--c', color);
+            p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+            p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+            p.addEventListener('animationend', () => p.remove(), { once: true });
+            fxLayer.appendChild(p);
+        }
+    }
+
+    function floatPlus(cx, cy) {
+        const el = document.createElement('span');
+        el.className = 'plus';
+        el.textContent = '+1';
+        el.style.left = cx + 'px';
+        el.style.top = cy + 'px';
+        el.addEventListener('animationend', () => el.remove(), { once: true });
+        fxLayer.appendChild(el);
+    }
+
+    function centreOf(b) {
+        return { x: b.x + size / 2, y: b.y + size * 0.6 };
+    }
+
+    // ---------- Ambient balloons (start and game over screens) ----------
+
+    function showAmbient() {
+        ambientLayer.textContent = '';
+        const count = Math.max(4, Math.min(9, Math.round(boardW / 110)));
+        for (let i = 0; i < count; i++) {
+            const el = createBalloonElement(COLORS[i % COLORS.length]);
+            const rise = 14 + Math.random() * 12;
+            el.style.left = Math.random() * Math.max(0, boardW - size) + 'px';
+            el.style.top = boardH + 20 + 'px';
+            el.style.setProperty('--size', size * (0.8 + Math.random() * 0.8) + 'px');
+            el.style.setProperty('--rise', rise + 's');
+            el.style.setProperty('--delay', -Math.random() * rise + 's');
+            ambientLayer.appendChild(el);
+        }
+    }
+
+    function clearAmbient() {
+        ambientLayer.textContent = '';
+    }
+
+    // ---------- Game flow ----------
+
+    function removeBalloon(b) {
+        b.el.remove();
+        balloonByElement.delete(b.el);
+        balloons = balloons.filter((other) => other !== b);
+    }
+
+    function clearBalloons() {
+        balloons = [];
+        balloonByElement.clear();
+        balloonLayer.textContent = '';
+        fxLayer.textContent = '';
+    }
+
+    function spawnBalloon() {
+        const { x, y } = pickSpot();
+        const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        const el = createBalloonElement(color);
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+
+        const b = { el, x, y, color, born: game.clock };
+        balloons.push(b);
+        balloonByElement.set(el, b);
+        balloonLayer.appendChild(el);
+
+        if (game.timeOut >= MIN_TIMEOUT)
+            game.timeOut -= Math.trunc(game.timeOut / DECREMENT_INDEX);
+        game.nextSpawn = game.clock + game.timeOut;
+    }
+
+    function popBalloon(b) {
+        const { x, y } = centreOf(b);
+        removeBalloon(b);
+        burst(x, y, b.color, false);
+        floatPlus(x, y);
+        playSound('pop');
+        vibrate(8);
+
+        game.score++;
+        renderScore();
+        bump(scoreEl);
+        if (game.score > best) {
+            best = game.score;
+            store.set('bp.best', best);
+            renderBest();
+        }
+    }
+
+    function missBalloon(b) {
+        const { x, y } = centreOf(b);
+        removeBalloon(b);
+        burst(x, y, b.color, true);
+        playSound('miss');
+
+        game.misses++;
+        renderLives();
+        livesEl.animate(
+            [{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }],
+            { duration: 240 }
+        );
+
+        if (game.misses >= MAX_MISSES)
+            endGame();
+    }
+
+    function frame(now) {
+        if (game.phase != 'playing')
+            return;
+
+        // A long gap (slow device, throttled tab) must not count against the player
+        game.clock += Math.min(now - game.last, 100);
+        game.last = now;
+
+        for (const b of balloons.slice()) {
+            if (game.clock - b.born >= BALLOON_LIFE) {
+                missBalloon(b);
+                if (game.phase != 'playing')
+                    return;
+            }
+        }
+
+        if (game.clock >= game.nextSpawn)
+            spawnBalloon();
+
+        game.raf = requestAnimationFrame(frame);
+    }
+
+    function startGame() {
+        cancelAnimationFrame(game.raf);
+        startDialog.close();
+        pauseDialog.close();
+        overDialog.close();
+
+        measure();
+        clearBalloons();
+        clearAmbient();
+        board.classList.remove('is-paused');
+
+        game.phase = 'playing';
+        game.clock = 0;
+        game.nextSpawn = FIRST_SPAWN;
+        game.timeOut = MAX_TIMEOUT;
+        game.score = 0;
+        game.misses = 0;
+        game.bestAtStart = best;
+
+        renderScore();
+        renderBest();
+        renderLives();
+        pauseButton.disabled = false;
+        getAudio();
+
+        game.last = performance.now();
+        game.raf = requestAnimationFrame(frame);
+    }
+
+    function pauseGame() {
+        if (game.phase != 'playing')
+            return;
+        game.phase = 'paused';
+        cancelAnimationFrame(game.raf);
+        board.classList.add('is-paused');
+        livesEl.classList.remove('low');
+        pauseDialog.showModal();
+    }
+
+    function resumeGame() {
+        if (game.phase != 'paused')
+            return;
+        game.phase = 'playing';
+        board.classList.remove('is-paused');
+        renderLives();
+        if (pauseDialog.open)
+            pauseDialog.close();
+        game.last = performance.now();
+        game.raf = requestAnimationFrame(frame);
+    }
+
+    function endGame() {
+        game.phase = 'over';
+        cancelAnimationFrame(game.raf);
+        pauseButton.disabled = true;
+        livesEl.classList.remove('low');
+        playSound('over');
+
+        // Pop whatever is left on screen so nothing lingers behind the dialog
+        for (const b of balloons) {
+            const { x, y } = centreOf(b);
+            burst(x, y, b.color, true);
+        }
+        balloonLayer.textContent = '';
+        balloons = [];
+        balloonByElement.clear();
+        showAmbient();
+
+        const newBest = game.score > game.bestAtStart && game.score > 0;
+        $('finalScore').textContent = game.score;
+        $('finalBest').textContent = best;
+        $('finalTime').textContent = formatTime(game.clock);
+        $('newBestBadge').hidden = !newBest;
+        $('shareLabel').textContent = (ISANDROID || navigator.share) ? 'Share' : 'Copy link';
+        $('shareIcon').setAttribute('href', (ISANDROID || navigator.share) ? '#i-share' : '#i-copy');
+        $('startBestValue').textContent = best;
+        $('startBest').hidden = false;
+
+        setTimeout(() => {
+            if (game.phase == 'over')
+                overDialog.showModal();
+        }, 550);
+    }
+
+    // ---------- Sharing ----------
+
+    function shareText() {
+        return `I scored ${game.score} on Balloon Pop. Can you beat it?`;
+    }
+
+    // Inside the Android WebView window.open() would load the page over the game, so every
+    // link that leaves the game must go through here (or be a plain <a href>, which the click
+    // handler below routes the same way).
+    function openExternal(url) {
+        if (ISANDROID)
+            AndroidShareHandler.nativeOpenBrowserLink(url);
+        else
+            window.open(url, '_blank', 'noopener');
+    }
+
+    async function copyText(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+        catch (e) { /* no clipboard permission, or an insecure page: fall back to a hidden textarea */ }
+
+        // Appended to the open dialog, because everything outside a modal dialog is inert
+        const field = document.createElement('textarea');
+        field.value = text;
+        field.setAttribute('readonly', '');
+        field.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+        overDialog.appendChild(field);
+        field.select();
+        let copied = false;
+        try { copied = document.execCommand('copy'); } catch (e) { /* copy blocked */ }
+        field.remove();
+        return copied;
+    }
+
+    // The system share sheet where there is one (Android app, iOS, Android, Safari, Chrome and Edge),
+    // otherwise the link is copied, so every browser has a working way to share.
+    async function shareScore() {
+        const shareData = { title: 'Balloon Pop', text: shareText(), url: SHARE_URL };
+
+        if (ISANDROID) {
+            AndroidShareHandler.nativeShare(shareData.title, shareData.text, shareData.url);
+        }
+        else if (navigator.share) {
+            try { await navigator.share(shareData); } catch (e) { /* share sheet dismissed */ }
         }
         else {
-            balloon.onmousedown = (e) => {
-                removeBalloon(e.target);
+            const label = $('shareLabel');
+            label.textContent = (await copyText(`${shareData.text} ${shareData.url}`)) ? 'Copied!' : 'Copy failed';
+            setTimeout(() => { label.textContent = 'Copy link'; }, 1800);
+        }
+    }
+
+    function postScore() {
+        const postUrl = 'https://x.com/intent/tweet'
+            + `?text=${encodeURIComponent(shareText())}&url=${encodeURIComponent(SHARE_URL)}&hashtags=balloonPop`;
+
+        // The X app still uses the com.twitter.android package. If it is missing or does not take the
+        // link, the native side falls back to the browser.
+        if (ISANDROID)
+            AndroidShareHandler.nativeTwitterShare(postUrl);
+        else
+            openExternal(postUrl);
+    }
+
+    // ---------- Events ----------
+
+    // Pointer events cover mouse, touch and pen alike, and each finger pops its own balloon
+    balloonLayer.addEventListener('pointerdown', (e) => {
+        if (game.phase != 'playing')
+            return;
+        const balloon = e.target.closest('.balloon');
+        const b = balloon && balloonByElement.get(balloon);
+        if (b) {
+            e.preventDefault();
+            popBalloon(b);
+        }
+    });
+
+    $('playButton').addEventListener('click', startGame);
+    $('restartButton').addEventListener('click', startGame);
+    $('pauseRestartButton').addEventListener('click', startGame);
+    $('resumeButton').addEventListener('click', resumeGame);
+    pauseButton.addEventListener('click', pauseGame);
+    $('shareScoreButton').addEventListener('click', shareScore);
+    $('postScoreButton').addEventListener('click', postScore);
+
+    soundButton.addEventListener('click', () => {
+        soundOn = !soundOn;
+        store.set('bp.sound', soundOn ? 'on' : 'off');
+        renderSoundButton();
+    });
+
+    // Escape closes the pause dialog, which resumes the game
+    pauseDialog.addEventListener('close', resumeGame);
+
+    // The start and game over screens are the only way forward, so they cannot be dismissed
+    startDialog.addEventListener('cancel', (e) => e.preventDefault());
+    overDialog.addEventListener('cancel', (e) => e.preventDefault());
+
+    document.addEventListener('keydown', (e) => {
+        if (game.phase == 'playing' && (e.key == 'Escape' || e.key == 'p' || e.key == 'P'))
+            pauseGame();
+    });
+
+    // Leaving the tab pauses, so balloons never burst while nobody is watching
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden)
+            pauseGame();
+    });
+
+    window.addEventListener('resize', measure);
+
+    // The Android app opens links in the system browser instead of inside the WebView
+    if (ISANDROID) {
+        document.addEventListener('click', (e) => {
+            const anchor = e.target.closest('a[href]');
+            if (anchor) {
+                e.preventDefault();
+                openExternal(anchor.href);
             }
-        }
-
-        setTimeout(() => incrementFailedToPop(balloon), 5000);
-
-        totalBalloons++;
-        displayTotalBalloons();
-        document.getElementById("balloonBoard").appendChild(balloon);
-        if (!gameOver && (timeOut = timeOut >= MIN_TIMEOUT ? timeOut - parseInt(timeOut/DECREMENT_INDEX, 10) : timeOut)) {
-            setTimeout(addBalloons, timeOut);
-        }
-    }
-}
-
-
-var timeOut = MAX_TIMEOUT;
-
-
-function shareScore() {
-    var shareData = {
-        title: document.title,
-        text: `I scored ${poppedBalloons} on Balloon Pop. Can you beat it?`,
-        url: 'https://balloonpop.xyz/'
-    }
-    if (DEVICETYPE == 'android')
-        AndroidShareHandler.nativeShare(shareData.title, shareData.text, shareData.url);
-    else
-        navigator.share(shareData);
-}
-
-function shareScoreOnTwitter() {
-    var shareData = {
-        title: document.title,
-        text: `I scored ${poppedBalloons} on Balloon Pop. Can you beat it?`,
-        url: 'https://balloonpop.xyz/'
+        });
     }
 
-    var twitterShareUrl = `https://twitter.com/intent/tweet?hashtags=ballonPop&text=${shareData.text}&url=${shareData.url}`;
-    
-    if (DEVICETYPE == 'android')
-        AndroidShareHandler.nativeTwitterShare(twitterShareUrl);
-    else if (ISTOUCHDEVICE) {
-        var phantomAnchor = document.createElement("a");
-        phantomAnchor.setAttribute('href', twitterShareUrl);
-        phantomAnchor.click();
-    }
-    else
-        window.open(twitterShareUrl, '_blank').focus();
-}
+    // ---------- Init ----------
 
-if (DEVICETYPE == 'android') {
-    var anchorElements = document.getElementsByTagName('a');
-    for(var i = 0; i < anchorElements.length; i++){
-        anchorElements[i].onclick = function(event){ 
-            event.preventDefault();
-            AndroidShareHandler.nativeOpenBrowserLink(event.currentTarget.getAttribute('href'))
-        } 
-    }
-}
+    measure();
+    renderBest();
+    renderScore(false);
+    renderLives();
+    renderSoundButton();
+    $('startBestValue').textContent = best;
+    $('startBest').hidden = best == 0;
+    showAmbient();
+    startDialog.showModal();
+})();
