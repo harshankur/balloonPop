@@ -1,0 +1,10 @@
+# Everything in this folder is published as the site except these (Cloudflare Workers static assets).
+.git
+.claude
+.DS_Store
+.gitignore
+.gitattributes
+.assetsignore
+wrangler.jsonc
+README.md
+node_modules

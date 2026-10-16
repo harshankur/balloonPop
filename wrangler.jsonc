@@ -1,0 +1,12 @@
+// balloonpop.harshankur.com on Cloudflare Workers: this folder is the site, served as static assets
+// with no Worker code (.assetsignore lists what is not published). Cloudflare's Git integration runs
+// `npx wrangler deploy` on every push to master.
+{
+  "name": "balloonpop",
+  "compatibility_date": "2026-10-01",
+  // No usage reports from the deploy tool to Cloudflare.
+  "send_metrics": false,
+  "assets": {
+    "directory": "."
+  }
+}
