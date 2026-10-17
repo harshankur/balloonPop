@@ -451,7 +451,7 @@
 
         setTimeout(() => {
             if (game.phase == 'over')
-                overDialog.showModal();
+                showCard(overDialog);
         }, 550);
     }
 
@@ -520,6 +520,79 @@
         else
             openExternal(postUrl);
     }
+
+    // ---------- Consent prompt ----------
+
+    // The view counter asks before it counts in detail, with a prompt of its own (consent.js, which runs after this
+    // script) that it adds at the end of the page, fixed to the bottom corner of the window. Two things are moved:
+    //  - While a card is open as a modal dialog, everything outside it is inert: the prompt would show above the
+    //    backdrop but could not be answered. So it lives inside a card: the open start or game-over card (the ones
+    //    with the button that opens it again), and otherwise the start card, which is closed during play, so the
+    //    prompt never covers a balloon.
+    //  - On a phone the card fills the screen, and the prompt at the bottom would cover its Play button. So it sits
+    //    in an anchor that ends just above the card's main button: the prompt places itself against the anchor's
+    //    bottom (the anchor is its containing block, see .consent-anchor) and covers at most the text above it.
+    //    Where there is less room than the prompt needs above the button (a phone on its side), it keeps its own
+    //    place at the bottom right of the window, and the card moves to the left to make room beside it for as long
+    //    as the prompt waits for a first answer.
+    const CONSENT_PROMPT = 'viewcounter-consent';
+    const WIDE_WINDOW = 480;    // px from which the prompt no longer spans the window (consent.js)
+    const PROMPT_ROOM = 300;    // px the prompt needs above a button: what it takes on a narrow phone, and a little more
+    const mainButtons = new Map([[startDialog, $('playButton')], [overDialog, $('restartButton')]]);
+    const consentAnchor = document.createElement('div');
+    consentAnchor.className = 'consent-anchor';
+
+    function fitConsentPrompt() {
+        const card = consentAnchor.parentElement;
+        if (!card || !card.open)
+            return;
+        // Offsets, unlike the bounding box, ignore the card's entrance animation
+        const room = card.offsetTop + card.clientTop + mainButtons.get(card).offsetTop - card.scrollTop;
+        const fits = room >= PROMPT_ROOM;
+        consentAnchor.style.height = fits ? room + 'px' : '';
+        const waiting = Boolean(window.viewcounterConsent) && window.viewcounterConsent.status() == 'unset';
+        card.classList.toggle('card-aside', !fits && waiting && window.innerWidth >= WIDE_WINDOW);
+    }
+
+    function placeConsentPrompt() {
+        const prompt = document.querySelector(CONSENT_PROMPT);
+        if (!prompt)
+            return;
+        if (prompt.parentElement !== consentAnchor)
+            consentAnchor.appendChild(prompt);
+        const card = [...mainButtons.keys()].find((dialog) => dialog.open) || startDialog;
+        if (consentAnchor.parentElement !== card)
+            card.appendChild(consentAnchor);
+        fitConsentPrompt();
+    }
+
+    function showCard(dialog) {
+        dialog.showModal();
+        placeConsentPrompt();
+    }
+
+    new MutationObserver(placeConsentPrompt).observe(document.body, { childList: true });
+    // The button moves when the window changes size and when the card's own content does (the font arriving)
+    const cardObserver = new ResizeObserver(fitConsentPrompt);
+    mainButtons.forEach((button, card) => cardObserver.observe(card));
+    window.addEventListener('resize', fitConsentPrompt);
+    window.addEventListener('viewcounter:consent', fitConsentPrompt);
+
+    // In the Android app a link has to go through the app to reach the browser (see openExternal), and the prompt's
+    // link to the privacy notice is drawn where the click handler below cannot see it, so it would open the notice
+    // inside the game. There the prompt goes without it; the card's own Datenschutz link opens the notice instead.
+    if (ISANDROID) {
+        const consentScript = document.querySelector('script[src$="/consent.js"]');
+        if (consentScript)
+            consentScript.removeAttribute('data-privacy-url');
+    }
+
+    // Anywhere but the published site (a downloaded copy, a local server) consent.js does nothing, and the button
+    // that would open its prompt goes. Deferred scripts have run by DOMContentLoaded.
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!window.viewcounterConsent)
+            document.querySelectorAll('[data-viewcounter-consent]').forEach((button) => { button.hidden = true; });
+    });
 
     // ---------- Events ----------
 
@@ -590,5 +663,5 @@
     $('startBestValue').textContent = best;
     $('startBest').hidden = best == 0;
     showAmbient();
-    startDialog.showModal();
+    showCard(startDialog);
 })();

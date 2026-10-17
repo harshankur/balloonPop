@@ -478,20 +478,35 @@ button { font-family: inherit; }
 /* The legal pages are shared by every site of the operator and live on harshankur.com. */
 .legal {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 16px;
+    gap: 4px 16px;
     margin: 10px 0 0;
     font-size: 13px;
 }
 
-.legal a {
+.legal a,
+.legal button {
+    white-space: nowrap;
     color: var(--ink-soft);
     text-underline-offset: 2px;
     border-radius: 4px;
 }
 
-.legal a:hover { color: var(--ink); }
-.legal a:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+/* "Datenschutz-Einstellungen" opens the view counter's consent prompt in the page instead of going anywhere, so it
+   is a button (which the Android app's link handler leaves alone), dressed as the links beside it. */
+.legal button {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.legal a:hover, .legal button:hover { color: var(--ink); }
+.legal a:focus-visible, .legal button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 
 .copyright {
     margin: 6px 0 0;
@@ -508,6 +523,48 @@ button { font-family: inherit; }
 .copyright a:hover { color: var(--ink); }
 .copyright a:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 .card-links svg { width: 17px; height: 17px; }
+
+/* ---------- Consent prompt ----------
+   The view counter's prompt (consent.js) draws itself in a closed shadow root; these custom properties dress it as
+   one of the game's cards, the same in a dark system theme, since the game has only this one look. */
+
+viewcounter-consent {
+    --viewcounter-consent-font: var(--font);
+    --viewcounter-consent-background: var(--card-bg);
+    --viewcounter-consent-color: var(--ink);
+    --viewcounter-consent-border: var(--line);
+    --viewcounter-consent-radius: 20px;
+    --viewcounter-consent-shadow: 0 18px 50px rgba(20, 33, 61, 0.35);
+    --viewcounter-consent-button-background: #f1f4fa;
+    --viewcounter-consent-button-color: var(--ink);
+    --viewcounter-consent-button-border: #f1f4fa;
+    --viewcounter-consent-link: var(--ink-soft);
+    --viewcounter-consent-focus: var(--sun);
+    pointer-events: auto;
+}
+
+/* js/index.js keeps the prompt in this anchor, inside the open start or game-over card, where it can be answered
+   (everything outside a modal dialog is inert) and paints above the card. The prompt is fixed to the bottom corner
+   of its containing block, which layout containment makes this box: the window, unless the script ends it above the
+   card's main button. It lets every click through but the prompt's own. It waits for the card's entrance to
+   finish, since while the card moves it would be placed against the card. */
+.consent-anchor {
+    position: fixed;
+    inset: 0 0 auto;
+    height: 100%;
+    contain: layout;
+    pointer-events: none;
+}
+
+.card[open] > .consent-anchor { animation: consent-wait 0.32s step-end; }
+
+/* A window too short for the prompt above the card's main button (a phone on its side): the card makes room for the
+   prompt, which stays at the bottom right, until it is answered. */
+.card-aside { margin-inline-start: 16px; }
+
+@keyframes consent-wait {
+    from { visibility: hidden; }
+}
 
 /* ---------- Buttons ---------- */
 
@@ -648,5 +705,5 @@ button { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
     .cloud, .ambient .balloon, .balloon-body, .lives.low { animation: none; }
     .balloon-body { animation: none; }
-    .card[open], .badge { animation: none; }
+    .card[open], .badge, .card[open] > .consent-anchor { animation: none; }
 }

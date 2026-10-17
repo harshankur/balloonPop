@@ -20,7 +20,7 @@
     <!-- index.css and js/index.js carry a ?v= version. Cloudflare serves them with max-age=0, must-revalidate,
          so a browser checks for a newer copy on every load; the version is a backstop for any cache in between.
          Bump it only when this page and a script change together in a way an old copy could not handle. -->
-    <link rel="stylesheet" href="index.css?v=20261010">
+    <link rel="stylesheet" href="index.css?v=20261017">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
   </head>
@@ -93,7 +93,7 @@
       <nav class="card-links">
         <a href="https://www.buymeacoffee.com/harshankur" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-coffee"/></svg>Buy me a coffee</a>
       </nav>
-      <p class="legal"><a href="https://harshankur.com/impressum" target="_blank" rel="noopener">Impressum</a><a href="https://harshankur.com/datenschutz#balloonpop" target="_blank" rel="noopener">Datenschutz</a></p>
+      <p class="legal"><a href="https://harshankur.com/impressum" target="_blank" rel="noopener">Impressum</a><a href="https://harshankur.com/datenschutz#balloonpop" target="_blank" rel="noopener">Datenschutz</a><button type="button" data-viewcounter-consent>Datenschutz-Einstellungen</button></p>
       <p class="copyright">Balloon Pop &copy; 2026 <a href="https://harshankur.com" target="_blank" rel="noopener">Harsh Ankur</a></p>
     </dialog>
 
@@ -132,15 +132,18 @@
       <nav class="card-links">
         <a href="https://www.buymeacoffee.com/harshankur" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-coffee"/></svg>Enjoying it? Buy me a coffee</a>
       </nav>
-      <p class="legal"><a href="https://harshankur.com/impressum" target="_blank" rel="noopener">Impressum</a><a href="https://harshankur.com/datenschutz#balloonpop" target="_blank" rel="noopener">Datenschutz</a></p>
+      <p class="legal"><a href="https://harshankur.com/impressum" target="_blank" rel="noopener">Impressum</a><a href="https://harshankur.com/datenschutz#balloonpop" target="_blank" rel="noopener">Datenschutz</a><button type="button" data-viewcounter-consent>Datenschutz-Einstellungen</button></p>
       <p class="copyright">Balloon Pop &copy; 2026 <a href="https://harshankur.com" target="_blank" rel="noopener">Harsh Ankur</a></p>
     </dialog>
 
-    <script src="./js/index.js?v=20261010"></script>
-
-    <!-- Page views, counted by the self-hosted viewcounter (views.harshankur.com). data-hosts keeps
-         it to the published site: a downloaded copy and a local server send nothing. The Android app loads this
-         same host (with ?device=android), so its views are counted too. -->
-    <script defer src="https://views.harshankur.com/tracker.js" data-app="balloonpop" data-hosts="balloonpop.harshankur.com"></script>
+    <!-- Page views, counted by the self-hosted viewcounter (views.harshankur.com): at the edge, without consent, and
+         in more detail (tracker.js) only once the player allows it in the counter's prompt (consent.js). The
+         "Datenschutz-Einstellungen" button on the cards opens that prompt again. data-hosts keeps it to the published
+         site: a downloaded copy and a local server show no prompt and send nothing. The Android app loads this same
+         host (with ?device=android), so its views are counted too. It comes before js/index.js, which adjusts it for
+         the app before it runs (it is deferred, so it still runs after the page is parsed). -->
+    <script defer src="https://views.harshankur.com/consent.js" data-app="balloonpop" data-hosts="balloonpop.harshankur.com"
+      data-privacy-url="https://harshankur.com/datenschutz#balloonpop"></script>
+    <script src="./js/index.js?v=20261017"></script>
   </body>
 </html>
