@@ -558,8 +558,10 @@ viewcounter-consent {
 
 .card[open] > .consent-anchor { animation: consent-wait 0.32s step-end; }
 
-/* A window too short for the prompt above the card's main button (a phone on its side): the card makes room for the
-   prompt, which stays at the bottom right, until it is answered. */
+/* A window too short for the prompt above the card's main button (a phone on its side): while the prompt shows at
+   the bottom right, the card moves to the left, narrowed by js/index.js to fit beside it, and the prompt is scaled
+   towards its corner where even that leaves too little room. */
+.consent-anchor { transform-origin: 100% 100%; }
 .card-aside { margin-inline-start: 16px; }
 
 @keyframes consent-wait {
