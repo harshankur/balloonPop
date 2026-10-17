@@ -626,7 +626,7 @@
 
     // In the Android app a link has to go through the app to reach the browser (see openExternal), and the prompt's
     // link to the privacy notice is drawn where the click handler below cannot see it, so it would open the notice
-    // inside the game. There the prompt goes without it; the card's own Datenschutz link opens the notice instead.
+    // inside the game. There the prompt goes without it; the card's own Privacy link opens the notice instead.
     if (ISANDROID) {
         const consentScript = document.querySelector('script[src$="/consent.js"]');
         if (consentScript)

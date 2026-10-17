@@ -493,7 +493,7 @@ button { font-family: inherit; }
     border-radius: 4px;
 }
 
-/* "Datenschutz-Einstellungen" opens the view counter's consent prompt in the page instead of going anywhere, so it
+/* "Privacy settings" opens the view counter's consent prompt in the page instead of going anywhere, so it
    is a button (which the Android app's link handler leaves alone), dressed as the links beside it. */
 .legal button {
     margin: 0;
