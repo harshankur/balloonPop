@@ -17,9 +17,9 @@
     <title>Balloon Pop</title>
 
     <link rel="preload" href="fonts/fredoka-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <!-- index.css and js/index.js carry a ?v= version because the host caches them for 4 hours. Bump it only
-         when this page and a script change together in a way an old cached copy could not handle. Forgetting
-         is harmless: visitors just see the previous copy for up to 4 hours. -->
+    <!-- index.css and js/index.js carry a ?v= version. Cloudflare serves them with max-age=0, must-revalidate,
+         so a browser checks for a newer copy on every load; the version is a backstop for any cache in between.
+         Bump it only when this page and a script change together in a way an old copy could not handle. -->
     <link rel="stylesheet" href="index.css?v=20261010">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
