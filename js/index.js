@@ -451,7 +451,7 @@
 
         setTimeout(() => {
             if (game.phase == 'over')
-                showCard(overDialog);
+                overDialog.showModal();
         }, 550);
     }
 
@@ -520,125 +520,6 @@
         else
             openExternal(postUrl);
     }
-
-    // ---------- Consent prompt ----------
-
-    // The view counter asks before it counts in detail, with a prompt of its own (consent.js, which runs after this
-    // script) that it adds at the end of the page, fixed to the bottom corner of the window. Two things are moved:
-    //  - While a card is open as a modal dialog, everything outside it is inert: the prompt would show above the
-    //    backdrop but could not be answered. So it lives inside a card: the open start or game-over card (the ones
-    //    with the button that opens it again), and otherwise the start card, which is closed during play, so the
-    //    prompt never covers a balloon.
-    //  - On a phone the card fills the screen, and the prompt at the bottom would cover its Play button. So it sits
-    //    in an anchor that ends just above the card's main button: the prompt places itself against the anchor's
-    //    bottom (the anchor is its containing block, see .consent-anchor) and covers at most the text above it.
-    //    Where there is less room than the prompt needs above the button (a phone on its side), it keeps its own
-    //    place at the bottom right of the window, and while it shows, the card moves aside to the left: as narrow
-    //    as it needs to be for both to fit side by side, and where even the narrowest card leaves too little room,
-    //    the prompt is drawn a little smaller (the anchor is scaled towards its corner).
-    const CONSENT_PROMPT = 'viewcounter-consent';
-    const WIDE_WINDOW = 480;    // px from which the prompt no longer spans the window (consent.js)
-    const PROMPT_ROOM = 300;    // px the prompt needs above a button: what it takes on a narrow phone, and a little more
-    const PROMPT_WIDTH = 360;   // px the prompt is wide in a wide window (consent.js)
-    const EDGE = 16;            // px between the card, the prompt and the window's edges
-    const CARD_WIDTH = 380;     // px the card is wide by itself (index.css)
-    const MIN_CARD_WIDTH = 300; // px the card may narrow to beside the prompt
-    // Where the prompt is looked for, from the window's bottom right corner: inside it, clear of its rounded corner
-    const PROBE_X = 60;
-    const PROBE_Y = 30;
-    const mainButtons = new Map([[startDialog, $('playButton')], [overDialog, $('restartButton')]]);
-    const consentAnchor = document.createElement('div');
-    consentAnchor.className = 'consent-anchor';
-
-    // Whether the prompt is up. It says so only when it is answered, so it is looked for where it would be: the
-    // page cannot see into it, but a point it covers hits its element.
-    function promptShown() {
-        const consent = window.viewcounterConsent;
-        if (!consent)
-            return false;
-        // While it waits out the card's entrance it cannot be hit; then only a first question can be up
-        if (consentAnchor.getAnimations().length)
-            return consent.status() == 'unset';
-        const hit = document.elementFromPoint(window.innerWidth - PROBE_X, window.innerHeight - PROBE_Y);
-        return hit !== null && hit === document.querySelector(CONSENT_PROMPT);
-    }
-
-    function setCardAside(card, aside) {
-        card.classList.toggle('card-aside', aside);
-        if (!aside) {
-            card.style.width = '';
-            consentAnchor.style.transform = '';
-            return;
-        }
-        const free = window.innerWidth - 3 * EDGE;
-        const cardWidth = Math.min(CARD_WIDTH, Math.max(MIN_CARD_WIDTH, free - PROMPT_WIDTH));
-        const scale = Math.min(1, (free - cardWidth) / PROMPT_WIDTH);
-        card.style.width = cardWidth + 'px';
-        consentAnchor.style.transform = scale < 1 ? `scale(${scale})` : '';
-    }
-
-    function fitConsentPrompt() {
-        const card = consentAnchor.parentElement;
-        if (!card || !card.open)
-            return;
-        // Measured as the card stands by itself, so moving it aside cannot change the outcome.
-        // Offsets, unlike the bounding box, ignore the card's entrance animation.
-        setCardAside(card, false);
-        const room = card.offsetTop + card.clientTop + mainButtons.get(card).offsetTop - card.scrollTop;
-        const fits = room >= PROMPT_ROOM;
-        consentAnchor.style.height = fits ? room + 'px' : '';
-        if (!fits && window.innerWidth >= WIDE_WINDOW && promptShown())
-            setCardAside(card, true);
-    }
-
-    function placeConsentPrompt() {
-        const prompt = document.querySelector(CONSENT_PROMPT);
-        if (!prompt)
-            return;
-        if (prompt.parentElement !== consentAnchor)
-            consentAnchor.appendChild(prompt);
-        const card = [...mainButtons.keys()].find((dialog) => dialog.open) || startDialog;
-        if (consentAnchor.parentElement !== card)
-            card.appendChild(consentAnchor);
-        fitConsentPrompt();
-    }
-
-    function showCard(dialog) {
-        dialog.showModal();
-        placeConsentPrompt();
-    }
-
-    new MutationObserver(placeConsentPrompt).observe(document.body, { childList: true });
-    // The button moves when the window changes size and when the card's own content does (the font arriving)
-    const cardObserver = new ResizeObserver(fitConsentPrompt);
-    mainButtons.forEach((button, card) => cardObserver.observe(card));
-    window.addEventListener('resize', fitConsentPrompt);
-    window.addEventListener('viewcounter:consent', fitConsentPrompt);
-    // The prompt also comes and goes without a change of answer: opened by the button, put away with the same
-    // answer again or with Escape. Looked at once consent.js has handled the click or key.
-    const refitSoon = () => setTimeout(fitConsentPrompt);
-    document.addEventListener('click', refitSoon);
-    document.addEventListener('keydown', (e) => {
-        if (e.key == 'Escape')
-            refitSoon();
-    });
-    consentAnchor.addEventListener('animationend', fitConsentPrompt);
-
-    // In the Android app a link has to go through the app to reach the browser (see openExternal), and the prompt's
-    // link to the privacy notice is drawn where the click handler below cannot see it, so it would open the notice
-    // inside the game. There the prompt goes without it; the card's own Privacy link opens the notice instead.
-    if (ISANDROID) {
-        const consentScript = document.querySelector('script[src$="/consent.js"]');
-        if (consentScript)
-            consentScript.removeAttribute('data-privacy-url');
-    }
-
-    // Anywhere but the published site (a downloaded copy, a local server) consent.js does nothing, and the button
-    // that would open its prompt goes. Deferred scripts have run by DOMContentLoaded.
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!window.viewcounterConsent)
-            document.querySelectorAll('[data-viewcounter-consent]').forEach((button) => { button.hidden = true; });
-    });
 
     // ---------- Events ----------
 
@@ -709,5 +590,5 @@
     $('startBestValue').textContent = best;
     $('startBest').hidden = best == 0;
     showAmbient();
-    showCard(startDialog);
+    startDialog.showModal();
 })();
